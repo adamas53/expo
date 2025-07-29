@@ -9,7 +9,6 @@ import {
 
 import type { NativeTabOptions, NativeTabsViewProps } from './types';
 import { shouldTabBeVisible } from './utils';
-import { getPathFromState } from '../../link/linking';
 
 // We let native tabs to control the changes. This requires freeze to be disabled for tab bar.
 // Otherwise user may see glitches when switching between tabs.
@@ -23,22 +22,6 @@ export function NativeTabsView(props: NativeTabsViewProps) {
   const { builder, style, minimizeBehavior, disableIndicator } = props;
   const { state, descriptors, navigation } = builder;
   const { routes } = state;
-
-  let focusedIndex = state.index;
-  const isAnyRouteFocused =
-    routes[focusedIndex].key &&
-    descriptors[routes[focusedIndex].key] &&
-    shouldTabBeVisible(descriptors[routes[focusedIndex].key].options);
-
-  if (!isAnyRouteFocused) {
-    if (process.env.NODE_ENV !== 'production') {
-      throw new Error(
-        `The focused tab in NativeTabsView cannot be displayed. Make sure path is correct and the route is not hidden. Path: "${getPathFromState(state)}"`
-      );
-    }
-    // Set focusedIndex to the first visible tab
-    focusedIndex = routes.findIndex((route) => shouldTabBeVisible(descriptors[route.key].options));
-  }
 
   const children = routes
     .map((route, index) => ({ route, index }))

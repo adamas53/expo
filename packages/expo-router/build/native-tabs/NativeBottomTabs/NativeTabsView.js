@@ -7,7 +7,6 @@ exports.NativeTabsView = NativeTabsView;
 const react_1 = __importDefault(require("react"));
 const react_native_screens_1 = require("react-native-screens");
 const utils_1 = require("./utils");
-const linking_1 = require("../../link/linking");
 // We let native tabs to control the changes. This requires freeze to be disabled for tab bar.
 // Otherwise user may see glitches when switching between tabs.
 react_native_screens_1.featureFlags.experiment.controlledBottomTabs = false;
@@ -18,17 +17,6 @@ function NativeTabsView(props) {
     const { builder, style, minimizeBehavior, disableIndicator } = props;
     const { state, descriptors, navigation } = builder;
     const { routes } = state;
-    let focusedIndex = state.index;
-    const isAnyRouteFocused = routes[focusedIndex].key &&
-        descriptors[routes[focusedIndex].key] &&
-        (0, utils_1.shouldTabBeVisible)(descriptors[routes[focusedIndex].key].options);
-    if (!isAnyRouteFocused) {
-        if (process.env.NODE_ENV !== 'production') {
-            throw new Error(`The focused tab in NativeTabsView cannot be displayed. Make sure path is correct and the route is not hidden. Path: "${(0, linking_1.getPathFromState)(state)}"`);
-        }
-        // Set focusedIndex to the first visible tab
-        focusedIndex = routes.findIndex((route) => (0, utils_1.shouldTabBeVisible)(descriptors[route.key].options));
-    }
     const children = routes
         .map((route, index) => ({ route, index }))
         .filter(({ route: { key } }) => (0, utils_1.shouldTabBeVisible)(descriptors[key].options))
