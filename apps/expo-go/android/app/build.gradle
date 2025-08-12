@@ -105,9 +105,15 @@ android {
   applicationVariants.all { variant ->
     if (variant.buildType.name == 'release') {
       def shouldUploadCrashlytics = System.getenv("EAS_BUILD") != null
+      def symbolPath = "${buildDir}/intermediates/merged_native_libs/${variant.name}/merge${variant.name.capitalize()}NativeLibs/out/lib"
+      
+      println("Configuring Crashlytics for variant: ${variant.name}")
+      println("  Symbol upload enabled: ${shouldUploadCrashlytics}")
+      println("  Symbol path: ${symbolPath}")
+      
       variant.buildType.firebaseCrashlytics {
         nativeSymbolUploadEnabled shouldUploadCrashlytics
-        unstrippedNativeLibsDir file("${buildDir}/intermediates/merged_native_libs/${variant.name}/merge${variant.name.capitalize()}NativeLibs/out/lib")
+        unstrippedNativeLibsDir file(symbolPath)
       }
     }
   }
@@ -283,8 +289,17 @@ apply plugin: 'com.google.gms.google-services'
 def ensureCrashlyticsDir = tasks.register('ensureCrashlyticsDir') {
   doLast {
     // Create directories for all release variants
-    Files.createDirectories(Paths.get("${buildDir}/intermediates/merged_native_libs/mobileRelease/mergeMobileReleaseNativeLibs/out/lib"))
-    Files.createDirectories(Paths.get("${buildDir}/intermediates/merged_native_libs/questRelease/mergeQuestReleaseNativeLibs/out/lib"))
+    def mobileDir = "${buildDir}/intermediates/merged_native_libs/mobileRelease/mergeMobileReleaseNativeLibs/out/lib"
+    def questDir = "${buildDir}/intermediates/merged_native_libs/questRelease/mergeQuestReleaseNativeLibs/out/lib"
+    
+    println("Creating Crashlytics symbol directories:")
+    println("  Mobile: ${mobileDir}")
+    println("  Quest: ${questDir}")
+    
+    Files.createDirectories(Paths.get(mobileDir))
+    Files.createDirectories(Paths.get(questDir))
+    
+    println("Crashlytics symbol directories created successfully")
   }
 }
 preBuild.dependsOn(ensureCrashlyticsDir)
